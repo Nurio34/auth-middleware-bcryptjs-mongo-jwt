@@ -1,11 +1,12 @@
 import React from "react";
 
 type Props = {
+    value: string;
     isFormValid: boolean;
 };
 
 function SubmitButton(props: Props) {
-    const { isFormValid } = props;
+    const { value, isFormValid } = props;
 
     return (
         <button
@@ -13,7 +14,7 @@ function SubmitButton(props: Props) {
             disabled={!isFormValid}
             className="btn btn-sm btn-secondary disabled:btn-base-300"
         >
-            SubmitButton
+            {value}
         </button>
     );
 }

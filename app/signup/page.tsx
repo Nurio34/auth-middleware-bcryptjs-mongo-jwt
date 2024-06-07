@@ -2,8 +2,11 @@
 import { useState } from "react";
 import SubmitButton from "../Components/SubmitButton";
 import { signup } from "../actions";
+import { useRouter } from "next/navigation";
 
 function Signup() {
+    const router = useRouter();
+
     type FormType = {
         username: string;
         email: string;
@@ -22,9 +25,17 @@ function Signup() {
         (value) => value.trim() !== "",
     );
 
+    const handleSubmit = async () => {
+        const result = await signup(formData);
+
+        if (result.data) {
+            router.push("/login");
+        }
+    };
+
     return (
         <form
-            action={signup}
+            action={handleSubmit}
             className="grid gap-[1vh] justify-stretch max-w-lg py-[2vh] px-[4vw] border-secondary border my-[2vh] mx-[4vw] md:mx-auto"
         >
             <h2 className="text-center font-bold text-2xl">Sign Up !</h2>
@@ -73,7 +84,7 @@ function Signup() {
                     }
                 />
             </label>
-            <SubmitButton isFormValid={isFormValid} />
+            <SubmitButton value="Signup" isFormValid={isFormValid} />
         </form>
     );
 }
