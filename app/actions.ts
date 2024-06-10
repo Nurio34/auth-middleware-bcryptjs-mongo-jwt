@@ -5,13 +5,13 @@ import connectionToDB from "./db";
 import User from "./model";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 
 export const signup = async (formData: any) => {
     await connectionToDB();
 
     try {
         const { username, email, password } = formData;
-        console.log(formData);
 
         const checkUserInDB = await User.findOne({ email });
 
@@ -71,7 +71,7 @@ export const login = async (formData: any) => {
         email: checkUserInDB.email,
     };
 
-    const token = jwt.sign(tokenPayload, "DEFAULT_KEY", {
+    const token = jwt.sign(tokenPayload, process.env.NEXT_PUBLIC_JWT_SECRET!, {
         expiresIn: "1d",
     });
 
@@ -79,4 +79,35 @@ export const login = async (formData: any) => {
     getCookies.set("token", token);
 
     return { success: true, msg: "Loged in successfully !" };
+};
+
+export const getAuthedUser = async () => {
+    try {
+        const getCookies = cookies();
+        const token: RequestCookie | undefined = getCookies.get("token");
+
+        if (!token) {
+            return { success: false, msg: "No authanticated user" };
+        }
+
+        const decodedToken = jwt.verify(
+            token.value,
+            process.env.NEXT_PUBLIC_JWT_SECRET!,
+        ) as jwt.JwtPayload;
+        const user = await User.findOne({ _id: decodedToken.id });
+
+        if (!user) {
+            return {
+                success: false,
+                msg: "Error occued while 'getting user info' from DB",
+            };
+        }
+
+        return { success: true, data: JSON.parse(JSON.stringify(user)) };
+    } catch (error) {
+        return {
+            success: false,
+            msg: "Unexpected error occured while 'getAuthedUser()'",
+        };
+    }
 };
