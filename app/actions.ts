@@ -71,7 +71,7 @@ export const login = async (formData: any) => {
         email: checkUserInDB.email,
     };
 
-    const token = jwt.sign(tokenPayload, process.env.NEXT_PUBLIC_JWT_SECRET!, {
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET!, {
         expiresIn: "1d",
     });
 
@@ -92,7 +92,7 @@ export const getAuthedUser = async () => {
 
         const decodedToken = jwt.verify(
             token.value,
-            process.env.NEXT_PUBLIC_JWT_SECRET!,
+            process.env.JWT_SECRET!,
         ) as jwt.JwtPayload;
         const user = await User.findOne({ _id: decodedToken.id });
 
@@ -110,4 +110,9 @@ export const getAuthedUser = async () => {
             msg: "Unexpected error occured while 'getAuthedUser()'",
         };
     }
+};
+
+export const logout = () => {
+    const getCookies = cookies();
+    getCookies.delete("token");
 };
